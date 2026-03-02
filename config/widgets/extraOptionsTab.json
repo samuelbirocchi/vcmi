@@ -1,6 +1,6 @@
 {
 	"library" : "config/widgets/settings/library.json",
-	
+
 	"items":
 	[
 		{
@@ -12,7 +12,7 @@
 		{
 			"name": "textureCampaignOverdraw",
 			"type": "texture",
-			"color" : "blue", 
+			"color" : "blue",
 			"image": "DIBOXBCK",
 			"rect": {"x": 391, "y": 14, "w": 82, "h": 569}
 		},
@@ -55,6 +55,20 @@
 					"callback" : "setUnlimitedReplay",
 					"help" : "vcmi.optionsTab.unlimitedReplay",
 					"selected" : true
+				},
+				{
+					"name": "buttonSpectateAlliedBattles",
+					"image": "lobby/checkbox",
+					"callback" : "setSpectateAlliedBattles",
+					"help" : "vcmi.optionsTab.spectateAlliedBattles",
+					"selected" : true
+				},
+				{
+					"name": "buttonSpectateAllBattles",
+					"image": "lobby/checkbox",
+					"callback" : "setSpectateAllBattles",
+					"help" : "vcmi.optionsTab.spectateAllBattles",
+					"selected" : false
 				}
 			]
 		},
@@ -78,6 +92,20 @@
 					"alignment": "left",
 					"color": "yellow",
 					"text": "vcmi.optionsTab.unlimitedReplay.hover"
+				},
+				{
+					"name": "labelSpectateAlliedBattles",
+					"font": "small",
+					"alignment": "left",
+					"color": "yellow",
+					"text": "vcmi.optionsTab.spectateAlliedBattles.hover"
+				},
+				{
+					"name": "labelSpectateAllBattles",
+					"font": "small",
+					"alignment": "left",
+					"color": "yellow",
+					"text": "vcmi.optionsTab.spectateAllBattles.hover"
 				}
 			]
 		}

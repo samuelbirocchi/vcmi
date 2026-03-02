@@ -184,6 +184,9 @@ public:
 
 	void removeGUI() const;
 
+	bool shouldCreateMultiplayerSpectator() const;
+	bool shouldSpectateThisBattle(PlayerColor attacker, PlayerColor defender) const;
+
 private:
 	std::map<PlayerColor, std::shared_ptr<CBattleCallback>> battleCallbacks; //callbacks given to player interfaces
 	std::map<PlayerColor, std::shared_ptr<CPlayerEnvironment>> playerEnvironments;

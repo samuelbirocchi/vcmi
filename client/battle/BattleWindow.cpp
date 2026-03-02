@@ -758,6 +758,24 @@ void BattleWindow::bTacticPhaseEnd()
 
 void BattleWindow::blockUI(bool on)
 {
+	if(owner.curInt && owner.curInt->playerID == PlayerColor::SPECTATOR)
+	{
+		setShortcutBlocked(EShortcut::BATTLE_RETREAT, true);
+		setShortcutBlocked(EShortcut::BATTLE_SURRENDER, true);
+		setShortcutBlocked(EShortcut::BATTLE_CAST_SPELL, true);
+		setShortcutBlocked(EShortcut::BATTLE_WAIT, true);
+		setShortcutBlocked(EShortcut::BATTLE_DEFEND, true);
+		setShortcutBlocked(EShortcut::BATTLE_AUTOCOMBAT, true);
+		setShortcutBlocked(EShortcut::BATTLE_END_WITH_AUTOCOMBAT, true);
+		setShortcutBlocked(EShortcut::BATTLE_TACTICS_END, true);
+		setShortcutBlocked(EShortcut::BATTLE_TACTICS_NEXT, true);
+		setShortcutBlocked(EShortcut::BATTLE_TOGGLE_QUICKSPELL, true);
+		setShortcutBlocked(EShortcut::GLOBAL_OPTIONS, false);
+		quickSpellWindow->setInputEnabled(false);
+		unitActionWindow->setInputEnabled(false);
+		return;
+	}
+
 	bool canCastSpells = false;
 	auto hero = owner.getBattle()->battleGetMyHero();
 

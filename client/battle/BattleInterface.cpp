@@ -352,6 +352,17 @@ void BattleInterface::battleFinished(const BattleResult& br, QueryID queryID)
 	ENGINE->cursor().set(Cursor::Map::POINTER);
 	curInt->waitWhileDialog();
 
+	// Auto-dismiss for multiplayer battle spectators (not session spectate mode)
+	bool isAllySpectator = curInt && curInt->playerID == PlayerColor::SPECTATOR
+		&& !settings["session"]["spectate"].Bool();
+
+	if(isAllySpectator)
+	{
+		windowObject->close();
+		CPlayerInterface::battleInt.reset();
+		return;
+	}
+
 	if(settings["session"]["spectate"].Bool() && settings["session"]["spectate-skip-battle-result"].Bool())
 	{
 		curInt->cb->selectionMade(0, queryID);

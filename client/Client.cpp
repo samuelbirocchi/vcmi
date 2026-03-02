@@ -242,6 +242,10 @@ void CClient::initPlayerEnvironments()
 	{
 		playerEnvironments[PlayerColor::SPECTATOR] = std::make_shared<CPlayerEnvironment>(PlayerColor::SPECTATOR, this, std::make_shared<CCallback>(gamestate, std::nullopt, this));
 	}
+	else if(!settings["session"]["headless"].Bool() && shouldCreateMultiplayerSpectator())
+	{
+		playerEnvironments[PlayerColor::SPECTATOR] = std::make_shared<CPlayerEnvironment>(PlayerColor::SPECTATOR, this, std::make_shared<CCallback>(gamestate, std::nullopt, this));
+	}
 }
 
 void CClient::initPlayerInterfaces()
@@ -282,6 +286,10 @@ void CClient::initPlayerInterfaces()
 	}
 
 	if(settings["session"]["spectate"].Bool())
+	{
+		installNewPlayerInterface(std::make_shared<CPlayerInterface>(PlayerColor::SPECTATOR), PlayerColor::SPECTATOR, true);
+	}
+	else if(vstd::contains(playerEnvironments, PlayerColor::SPECTATOR))
 	{
 		installNewPlayerInterface(std::make_shared<CPlayerInterface>(PlayerColor::SPECTATOR), PlayerColor::SPECTATOR, true);
 	}
@@ -412,7 +420,11 @@ void CClient::battleStarted(const BattleID & battleID)
 	callBattleStart(leftSide.color, BattleSide::LEFT_SIDE);
 	callBattleStart(rightSide.color, BattleSide::RIGHT_SIDE);
 	callBattleStart(PlayerColor::UNFLAGGABLE, BattleSide::RIGHT_SIDE);
+
+	bool allySpectateActive = shouldSpectateThisBattle(leftSide.color, rightSide.color);
 	if(settings["session"]["spectate"].Bool() && !settings["session"]["spectate-skip-battle"].Bool())
+		callBattleStart(PlayerColor::SPECTATOR, BattleSide::RIGHT_SIDE);
+	else if(allySpectateActive)
 		callBattleStart(PlayerColor::SPECTATOR, BattleSide::RIGHT_SIDE);
 	
 	if(vstd::contains(playerint, leftSide.color) && playerint[leftSide.color]->human)
@@ -460,6 +472,12 @@ void CClient::battleStarted(const BattleID & battleID)
 			spectratorInt->cb->onBattleStarted(info);
 			CPlayerInterface::battleInt = std::make_shared<BattleInterface>(info->getBattleID(), leftSide.getArmy(), rightSide.getArmy(), leftSide.getHero(), rightSide.getHero(), att, def, spectratorInt);
 		}
+		else if(allySpectateActive)
+		{
+			auto spectatorInt = std::dynamic_pointer_cast<CPlayerInterface>(playerint[PlayerColor::SPECTATOR]);
+			spectatorInt->cb->onBattleStarted(info);
+			CPlayerInterface::battleInt = std::make_shared<BattleInterface>(info->getBattleID(), leftSide.getArmy(), rightSide.getArmy(), leftSide.getHero(), rightSide.getHero(), att, def, spectatorInt);
+		}
 	}
 
 	if(info->tacticDistance)
@@ -479,7 +497,7 @@ void CClient::battleFinished(const BattleID & battleID)
 			battleCallbacks[gameState().getBattle(battleID)->getSide(side).color]->onBattleEnded(battleID);
 	}
 
-	if(settings["session"]["spectate"].Bool() && !settings["session"]["spectate-skip-battle"].Bool())
+	if(vstd::contains(battleCallbacks, PlayerColor::SPECTATOR))
 		battleCallbacks[PlayerColor::SPECTATOR]->onBattleEnded(battleID);
 }
 
@@ -528,4 +546,57 @@ void CClient::registerBattleInterface(std::shared_ptr<IBattleEventsReceiver> bat
 void CClient::unregisterBattleInterface(std::shared_ptr<IBattleEventsReceiver> battleEvents, PlayerColor color)
 {
 	additionalBattleInts[color] -= battleEvents;
+}
+
+bool CClient::shouldCreateMultiplayerSpectator() const
+{
+	const auto & extraOptions = gameState().getStartInfo()->extraOptionsInfo;
+	if(!extraOptions.spectateAlliedBattles && !extraOptions.spectateAllBattles)
+		return false;
+
+	auto localPlayers = GAME->server().getAllClientPlayers(GAME->server().logicConnection->connectionID);
+
+	// Check if there are other human players not on this client
+	for(const auto & playerInfo : gameState().getStartInfo()->playerInfos)
+	{
+		if(playerInfo.second.isControlledByHuman() && !vstd::contains(localPlayers, playerInfo.first))
+			return true;
+	}
+
+	return false;
+}
+
+bool CClient::shouldSpectateThisBattle(PlayerColor attacker, PlayerColor defender) const
+{
+	if(!vstd::contains(playerint, PlayerColor::SPECTATOR))
+		return false;
+
+	if(settings["session"]["spectate"].Bool())
+		return false;
+
+	auto localPlayers = GAME->server().getAllClientPlayers(GAME->server().logicConnection->connectionID);
+
+	// Don't spectate battles where a local player is a combatant
+	if(vstd::contains(localPlayers, attacker) || vstd::contains(localPlayers, defender))
+		return false;
+
+	const auto & extraOptions = gameState().getStartInfo()->extraOptionsInfo;
+
+	if(extraOptions.spectateAllBattles)
+		return true;
+
+	if(extraOptions.spectateAlliedBattles)
+	{
+		for(const auto & localColor : localPlayers)
+		{
+			if(!localColor.isValidPlayer())
+				continue;
+
+			if(gameState().getPlayerRelations(localColor, attacker) == PlayerRelations::ALLIES
+				|| gameState().getPlayerRelations(localColor, defender) == PlayerRelations::ALLIES)
+				return true;
+		}
+	}
+
+	return false;
 }

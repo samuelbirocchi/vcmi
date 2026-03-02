@@ -128,6 +128,24 @@ OptionsTabBase::OptionsTabBase(const JsonPath & configPath)
 		GAME->server().setExtraOptionsInfo(info);
 	});
 
+	addCallback("setSpectateAlliedBattles", [&](int index){
+		bool isMultiplayer = GAME->server().loadMode == ELoadMode::MULTI;
+		Settings entry = persistentStorage.write["startExtraOptions"][isMultiplayer ? "multiPlayer" : "singlePlayer"]["spectateAlliedBattles"];
+		entry->Bool() = index;
+		ExtraOptionsInfo info = SEL->getStartInfo()->extraOptionsInfo;
+		info.spectateAlliedBattles = index;
+		GAME->server().setExtraOptionsInfo(info);
+	});
+
+	addCallback("setSpectateAllBattles", [&](int index){
+		bool isMultiplayer = GAME->server().loadMode == ELoadMode::MULTI;
+		Settings entry = persistentStorage.write["startExtraOptions"][isMultiplayer ? "multiPlayer" : "singlePlayer"]["spectateAllBattles"];
+		entry->Bool() = index;
+		ExtraOptionsInfo info = SEL->getStartInfo()->extraOptionsInfo;
+		info.spectateAllBattles = index;
+		GAME->server().setExtraOptionsInfo(info);
+	});
+
 	addCallback("setTurnTimerAccumulate", [&](int index){
 		TurnTimerInfo info = SEL->getStartInfo()->turnTimerInfo;
 		info.accumulatingTurnTimer = index;
@@ -434,6 +452,18 @@ void OptionsTabBase::recreate(bool campaign)
 	{
 		buttonUnlimitedReplay->setSelectedSilent(SEL->getStartInfo()->extraOptionsInfo.unlimitedReplay);
 		buttonUnlimitedReplay->block(GAME->server().isGuest());
+	}
+
+	if(auto buttonSpectateAlliedBattles = widget<CToggleButton>("buttonSpectateAlliedBattles"))
+	{
+		buttonSpectateAlliedBattles->setSelectedSilent(SEL->getStartInfo()->extraOptionsInfo.spectateAlliedBattles);
+		buttonSpectateAlliedBattles->block(GAME->server().isGuest());
+	}
+
+	if(auto buttonSpectateAllBattles = widget<CToggleButton>("buttonSpectateAllBattles"))
+	{
+		buttonSpectateAllBattles->setSelectedSilent(SEL->getStartInfo()->extraOptionsInfo.spectateAllBattles);
+		buttonSpectateAllBattles->block(GAME->server().isGuest());
 	}
 
 	if(auto buttonTurnOptions = widget<CButton>("buttonTurnOptions"))

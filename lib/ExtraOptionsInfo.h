@@ -16,6 +16,8 @@ struct DLL_LINKAGE ExtraOptionsInfo
 {
 	bool cheatsAllowed = true;
 	bool unlimitedReplay = false;
+	bool spectateAlliedBattles = true;
+	bool spectateAllBattles = false;
 
 	bool operator == (const ExtraOptionsInfo & other) const;
 
@@ -24,6 +26,11 @@ struct DLL_LINKAGE ExtraOptionsInfo
 	{
 		h & cheatsAllowed;
 		h & unlimitedReplay;
+		if(h.hasFeature(Handler::Version::ALLY_BATTLE_SPECTATE))
+		{
+			h & spectateAlliedBattles;
+			h & spectateAllBattles;
+		}
 	}
 };
 

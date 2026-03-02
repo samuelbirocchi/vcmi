@@ -931,6 +931,10 @@
 	"vcmi.optionsTab.unlimitedReplay.hover" : "Unlimited battle replay",
 	"vcmi.optionsTab.cheatAllowed.help" : "{Allow cheats}\nAllows the inputs of cheats during the game.",
 	"vcmi.optionsTab.unlimitedReplay.help" : "{Unlimited battle replay}\nNo limit of replaying battles.",
+	"vcmi.optionsTab.spectateAlliedBattles.hover" : "Spectate allied battles",
+	"vcmi.optionsTab.spectateAlliedBattles.help" : "{Spectate allied battles}\nWatch battles of allied players as a read-only spectator.",
+	"vcmi.optionsTab.spectateAllBattles.hover" : "Spectate all battles",
+	"vcmi.optionsTab.spectateAllBattles.help" : "{Spectate all battles}\nWatch battles of all players as a read-only spectator.",
 
 	// Custom victory conditions for H3 campaigns and HotA maps
 	"vcmi.map.victoryCondition.daysPassed.toOthers" : "The enemy has managed to survive till this day. Victory is theirs!",
